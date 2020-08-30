@@ -2,7 +2,7 @@
  
   这是用于Magisk的UnblockNeteaseMusic
 ## 本模块已包含
-* [UnblockNeteaseMusic](<https://github.com/AdguardTeam/AdGuardHome/releases/latest>)
+* [UnblockNeteaseMusic](<https://github.com/nondanee/UnblockNeteaseMusic>)
 * [magisk-module-installer](<https://github.com/topjohnwu/magisk-module-installer>)
 
 ## 安装
@@ -32,3 +32,7 @@ update    更新UnblockNeteaseMusic
 ## 卸载
 
 * Magisk Manager 中卸载
+
+## 许可
+
+The MIT License
