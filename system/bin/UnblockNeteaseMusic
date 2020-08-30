@@ -1,0 +1,109 @@
+#!/system/bin/sh
+
+UnblockNeteaseMusic_path="/data/adb/modules/UnblockNeteaseMusic"
+UnblockNeteaseMusic_link="https://github.com/nondanee/UnblockNeteaseMusic/releases"
+latest_UnblockNeteaseMusic_version=`curl -k -s -I "${UnblockNeteaseMusic_link}/latest" | grep -i location | grep -o "tag.*" | grep -o "v[0-9.]*"`
+download_link="https://codeload.github.com/nondanee/UnblockNeteaseMusic/zip/${latest_UnblockNeteaseMusic_version}"
+sources="kuwo qq xiami baidu joox kugou"
+nodejs=${UnblockNeteaseMusic_path}/node
+appjs=${UnblockNeteaseMusic_path}/UnblockNeteaseMusic/app.js
+uid=$(grep -m1 -i "com.netease.cloudmusic" /data/system/packages.list | cut -d' ' -f2)
+port=5464
+portssl=2229
+ports=$port:$portssl
+log=${UnblockNeteaseMusic_path}/日志.log
+
+check() {
+    if [ -e ${UnblockNeteaseMusic_path}/UnblockNeteaseMusic.pid ];then
+       echo "正在运行"
+    else
+       echo "没有运行"
+    fi
+}
+
+start() {
+    ping -c 1 114.114.114.114 > /dev/null 2>&1
+    if [ $? -eq 0 ];then
+       echo "网络连接正常，正在开启服务"
+       nohup "$nodejs" "$appjs" -a 0.0.0.0 -p $ports -o $sources -e "http://music.163.com" > "$log" 2>&1 &
+       iptables -t nat -A OUTPUT -p tcp -m owner --uid-owner $uid -m tcp --dport 80 -j DNAT --to 127.0.0.1:${port}
+       iptables -t nat -A OUTPUT -p tcp -m owner --uid-owner $uid -m tcp --dport 443 -j DNAT --to 127.0.0.1:${portssl}
+       touch ${UnblockNeteaseMusic_path}/UnblockNeteaseMusic.pid
+       echo "已开启"
+    else
+       echo "网络连接异常，请连接网络后重试"
+    fi
+}
+
+stop() {
+    iptables -t nat -D OUTPUT -p tcp -m owner --uid-owner $uid -m tcp --dport 80 -j DNAT --to 127.0.0.1:${port}
+    iptables -t nat -D OUTPUT -p tcp -m owner --uid-owner $uid -m tcp --dport 443 -j DNAT --to 127.0.0.1:${portssl}
+    rm -rf ${UnblockNeteaseMusic_path}/UnblockNeteaseMusic.pid
+    echo "已关闭服务"
+}
+
+update() {
+    if [ -e ${UnblockNeteaseMusic_path}/UnblockNeteaseMusic.pid ];then
+       stop
+    fi
+    echo "开始更新"
+    if [ "${latest_UnblockNeteaseMusic_version}" = "" ] ; then
+       echo "Error: 获取链接失败" 
+       exit 1
+    fi
+    curl "${download_link}" -k -L -o "${UnblockNeteaseMusic_path}/UnblockNeteaseMusic.zip" >&2
+    if [ "$?" != "0" ] ; then
+       echo "Error: 下载UnblockNeteaseMusic失败"
+       exit 1
+    fi
+    echo ${latest_UnblockNeteaseMusic_version} >> ${UnblockNeteaseMusic_path}/version
+    sed -i "s/v//g" ${UnblockNeteaseMusic_path}/version
+    version=$(cat ${UnblockNeteaseMusic_path}/version)
+    unzip -o "${UnblockNeteaseMusic_path}/UnblockNeteaseMusic.zip" -d ${UnblockNeteaseMusic_path} >&2
+    rm -rf ${UnblockNeteaseMusic_path}/UnblockNeteaseMusic
+    mv "${UnblockNeteaseMusic_path}/UnblockNeteaseMusic-${version}" "${UnblockNeteaseMusic_path}/UnblockNeteaseMusic"
+    rm -rf ${UnblockNeteaseMusic_path}/UnblockNeteaseMusic.zip
+    rm -rf ${UnblockNeteaseMusic_path}/version
+    
+    rm -rf ${UnblockNeteaseMusic_path}/module.prop
+    touch ${UnblockNeteaseMusic_path}/module.prop
+    echo "id=UnblockNeteaseMusic" > ${UnblockNeteaseMusic_path}/module.prop
+    echo "name=UnblockNeteaseMusic for Magisk" >> ${UnblockNeteaseMusic_path}/module.prop
+    echo "version=${latest_UnblockNeteaseMusic_version}" >> ${UnblockNeteaseMusic_path}/module.prop
+    echo "versionCode=$(date +%Y%m%d)" >> ${UnblockNeteaseMusic_path}/module.prop
+    echo "author=依然的爱" >> ${UnblockNeteaseMusic_path}/module.prop
+    echo "description=网易云音乐解锁变灰，服务状态控制请在在终端以su权限输入UnblockNeteaseMusic以控制，默认开机自启" >> ${UnblockNeteaseMusic_path}/module.prop
+    echo "更新完毕"
+}
+
+-help() {
+    echo "$0"
+    echo "-help    帮助"
+    echo "check    检查运行状态"
+    echo "start | stop | restart    开启服务|关闭服务|重启服务"
+    echo "update    更新UnblockNeteaseMusic"
+}
+
+case "$1" in
+  check)
+    check
+    ;;
+  start)
+    start
+    ;;
+  stop)
+    stop
+    ;;
+  restart)
+    stop && start
+    ;;
+  update)
+    update
+    ;;
+  -help)
+    -help
+    ;;
+  *)
+    -help
+    ;;
+esac
