@@ -22,17 +22,11 @@ check() {
 }
 
 start() {
-    ping -c 1 114.114.114.114 > /dev/null 2>&1
-    if [ $? -eq 0 ];then
-       echo "网络连接正常，正在开启服务"
-       nohup "$nodejs" "$appjs" -a 0.0.0.0 -p $ports -o $sources -e "http://music.163.com" > "$log" 2>&1 &
-       iptables -t nat -A OUTPUT -p tcp -m owner --uid-owner $uid -m tcp --dport 80 -j DNAT --to 127.0.0.1:${port}
-       iptables -t nat -A OUTPUT -p tcp -m owner --uid-owner $uid -m tcp --dport 443 -j DNAT --to 127.0.0.1:${portssl}
-       touch ${UnblockNeteaseMusic_path}/UnblockNeteaseMusic.pid
-       echo "已开启"
-    else
-       echo "网络连接异常，请连接网络后重试"
-    fi
+    nohup "$nodejs" "$appjs" -a 0.0.0.0 -p $ports -o $sources -e "http://music.163.com" > "$log" 2>&1 &
+    iptables -t nat -A OUTPUT -p tcp -m owner --uid-owner $uid -m tcp --dport 80 -j DNAT --to 127.0.0.1:${port}
+    iptables -t nat -A OUTPUT -p tcp -m owner --uid-owner $uid -m tcp --dport 443 -j DNAT --to 127.0.0.1:${portssl}
+    touch ${UnblockNeteaseMusic_path}/UnblockNeteaseMusic.pid
+    echo "已开启服务"
 }
 
 stop() {
