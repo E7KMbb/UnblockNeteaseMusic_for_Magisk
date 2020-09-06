@@ -6,6 +6,7 @@
 MODDIR=${0%/*}
 
 # 此脚本将在late_start service 模式执行
+boot_start="true"
 pid_file="$MODDIR/UnblockNeteaseMusic.pid"
 wait_count=0
 until [ $(getprop sys.boot_completed) -eq 1 ] && [ -d "/sdcard" ]; do
@@ -20,4 +21,6 @@ if [ -f ${pid_file} ] ; then
     rm -rf ${pid_file}
 fi
 
-UnblockNeteaseMusic start
+if [ boot_start = "true" ]; then
+    UnblockNeteaseMusic start
+fi

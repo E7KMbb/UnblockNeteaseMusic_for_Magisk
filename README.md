@@ -13,7 +13,7 @@
 
 ### 使用前
 
-1.安装 `busybox` 2.确保你的设备有 `curl` 命令
+1.安装 `busybox` 2.确保你的设备有 `curl` 命令 3.请在有网络的状态下启动
 
 ### 服务控制
 
@@ -23,7 +23,9 @@
 -help    帮助
 check    检查运行状态
 start | stop | restart    开启服务|关闭服务|重启服务
-update    更新UnblockNeteaseMusic
+boot_start_on    开启开机自启
+boot_start_off    关闭启开机自启
+update    更新UnblockNeteaseMusic脚本
 ```
 * 例如: `UnblockNeteaseMusic start` 以启动服务
 
