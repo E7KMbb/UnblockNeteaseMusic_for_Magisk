@@ -7,6 +7,8 @@ download_link="https://codeload.github.com/nondanee/UnblockNeteaseMusic/zip/${la
 sources="kuwo qq xiami baidu joox kugou"
 nodejs=${UnblockNeteaseMusic_path}/node
 appjs=${UnblockNeteaseMusic_path}/UnblockNeteaseMusic/app.js
+pid_file=${UnblockNeteaseMusic_path}/UnblockNeteaseMusic.pid
+boot_start=$(grep boot_start ${UnblockNeteaseMusic_path}/service.sh | head -n 1 | awk -F '=' '{print $2}')
 uid=$(grep -m1 -i "com.netease.cloudmusic" /data/system/packages.list | cut -d' ' -f2)
 port=5464
 portssl=2229
@@ -19,21 +21,40 @@ check() {
     else
        echo "没有运行"
     fi
+    if [ $boot_start = "true" ];then
+       echo "开机自启: 开启"
+    else
+       echo "开机自启: 关闭"
+    fi
+    echo "开始打印日志"
+    sleep 4
+    cat $log
 }
 
 start() {
     nohup "$nodejs" "$appjs" -a 0.0.0.0 -p $ports -o $sources -e "http://music.163.com" > "$log" 2>&1 &
+    echo -n $! > ${pid_file}
     iptables -t nat -A OUTPUT -p tcp -m owner --uid-owner $uid -m tcp --dport 80 -j DNAT --to 127.0.0.1:${port}
     iptables -t nat -A OUTPUT -p tcp -m owner --uid-owner $uid -m tcp --dport 443 -j DNAT --to 127.0.0.1:${portssl}
-    touch ${UnblockNeteaseMusic_path}/UnblockNeteaseMusic.pid
     echo "已开启服务"
 }
 
 stop() {
+    kill -9 `cat ${pid_file}` || kill `cat ${pid_file}`
     iptables -t nat -D OUTPUT -p tcp -m owner --uid-owner $uid -m tcp --dport 80 -j DNAT --to 127.0.0.1:${port}
     iptables -t nat -D OUTPUT -p tcp -m owner --uid-owner $uid -m tcp --dport 443 -j DNAT --to 127.0.0.1:${portssl}
-    rm -rf ${UnblockNeteaseMusic_path}/UnblockNeteaseMusic.pid
+    rm -rf ${pid_file}
     echo "已关闭服务"
+}
+
+boot_start_on() {
+    sed -i "s/boot_start=false/boot_start=true/g" ${UnblockNeteaseMusic_path}/service.sh
+    echo "开机自启: 开启"
+}
+
+boot_start_off() {
+    sed -i "s/boot_start=true/boot_start=false/g" ${UnblockNeteaseMusic_path}/service.sh
+    echo "开机自启: 关闭"
 }
 
 update() {
@@ -75,7 +96,9 @@ update() {
     echo "-help    帮助"
     echo "check    检查运行状态"
     echo "start | stop | restart    开启服务|关闭服务|重启服务"
-    echo "update    更新UnblockNeteaseMusic"
+    echo "boot_start_on    开启开机自启"
+    echo "boot_start_off    关闭启开机自启"
+    echo "update    更新UnblockNeteaseMusic脚本"
 }
 
 case "$1" in
@@ -89,7 +112,15 @@ case "$1" in
     stop
     ;;
   restart)
-    stop && start
+    stop
+    sleep 3
+    start
+    ;;
+  boot_start_on)
+    boot_start_on
+    ;;
+  boot_start_off)
+    boot_start_off
     ;;
   update)
     update
@@ -98,6 +129,7 @@ case "$1" in
     -help
     ;;
   *)
+    echo "Error : Not command"
     -help
     ;;
 esac
