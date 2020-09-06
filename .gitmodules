@@ -1,0 +1,4 @@
+[submodule "UnblockNeteaseMusic"]
+	path = UnblockNeteaseMusic
+	url = https://github.com/nondanee/UnblockNeteaseMusic
+	
