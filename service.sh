@@ -22,5 +22,11 @@ if [ -f ${pid_file} ] ; then
 fi
 
 if [ boot_start = "true" ]; then
-    UnblockNeteaseMusic start
+   for i in $(seq 1 15); do
+      ping -c 1 music.163.com
+      if [ $? -eq 0 ];then
+      UnblockNeteaseMusic start
+      break;
+      fi
+   done
 fi
