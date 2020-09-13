@@ -8,14 +8,15 @@ sources="kuwo qq xiami baidu joox kugou"
 nodejs=${UnblockNeteaseMusic_path}/node
 appjs=${UnblockNeteaseMusic_path}/UnblockNeteaseMusic/app.js
 pid_file=${UnblockNeteaseMusic_path}/UnblockNeteaseMusic.pid
-boot_start=$(grep boot_start ${UnblockNeteaseMusic_path}/service.sh | head -n 1 | awk -F '=' '{print $2}')
 uid=$(grep -m1 -i "com.netease.cloudmusic" /data/system/packages.list | cut -d' ' -f2)
+liteuid=$(grep -m1 -i "com.netease.cloudmusic.lite" /data/system/packages.list | cut -d' ' -f2)
 port=5464
 portssl=2229
 ports=$port:$portssl
 log=${UnblockNeteaseMusic_path}/日志.log
 
 check() {
+    boot_start=$(grep boot_start ${UnblockNeteaseMusic_path}/service.sh | head -n 1 | awk -F '=' '{print $2}')
     if [ -e ${UnblockNeteaseMusic_path}/UnblockNeteaseMusic.pid ];then
        echo "正在运行"
     else
@@ -36,6 +37,8 @@ start() {
     echo -n $! > ${pid_file}
     iptables -t nat -A OUTPUT -p tcp -m owner --uid-owner $uid -m tcp --dport 80 -j DNAT --to 127.0.0.1:${port}
     iptables -t nat -A OUTPUT -p tcp -m owner --uid-owner $uid -m tcp --dport 443 -j DNAT --to 127.0.0.1:${portssl}
+    iptables -t nat -A OUTPUT -p tcp -m owner --uid-owner $liteuid -m tcp --dport 80 -j DNAT --to 127.0.0.1:${port}
+    iptables -t nat -A OUTPUT -p tcp -m owner --uid-owner $liteuid -m tcp --dport 443 -j DNAT --to 127.0.0.1:${portssl}
     echo "已开启服务"
 }
 
@@ -43,6 +46,8 @@ stop() {
     kill -9 `cat ${pid_file}` || kill `cat ${pid_file}`
     iptables -t nat -D OUTPUT -p tcp -m owner --uid-owner $uid -m tcp --dport 80 -j DNAT --to 127.0.0.1:${port}
     iptables -t nat -D OUTPUT -p tcp -m owner --uid-owner $uid -m tcp --dport 443 -j DNAT --to 127.0.0.1:${portssl}
+    iptables -t nat -D OUTPUT -p tcp -m owner --uid-owner $liteuid -m tcp --dport 80 -j DNAT --to 127.0.0.1:${port}
+    iptables -t nat -D OUTPUT -p tcp -m owner --uid-owner $liteuid -m tcp --dport 443 -j DNAT --to 127.0.0.1:${portssl}
     rm -rf ${pid_file}
     echo "已关闭服务"
 }
