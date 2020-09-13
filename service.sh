@@ -23,7 +23,7 @@ fi
 
 if [ boot_start = "true" ]; then
    for i in $(seq 1 15); do
-      ping -c 1 music.163.com
+      ping -c 1 music.163.com > /dev/null 2>&1
       if [ $? -eq 0 ];then
       UnblockNeteaseMusic start
       break;
