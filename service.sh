@@ -28,5 +28,6 @@ if [ boot_start = "true" ]; then
       UnblockNeteaseMusic start
       exit 0
       fi
+      sleep 3
    done
 fi
