@@ -26,8 +26,8 @@ if [ boot_start = "true" ]; then
       ping -c 1 music.163.com > /dev/null 2>&1
       if [ $? -eq 0 ];then
       UnblockNeteaseMusic start
-      exit 0
+      break
       fi
-      sleep 3
+      sleep 7
    done
 fi
