@@ -8,8 +8,6 @@ sources="kuwo qq xiami baidu joox kugou"
 nodejs=${UnblockNeteaseMusic_path}/node
 appjs=${UnblockNeteaseMusic_path}/UnblockNeteaseMusic/app.js
 pid_file=${UnblockNeteaseMusic_path}/UnblockNeteaseMusic.pid
-uid=$(grep -m1 -i "com.netease.cloudmusic" /data/system/packages.list | cut -d' ' -f2)
-liteuid=$(grep -m1 -i "com.netease.cloudmusic.lite" /data/system/packages.list | cut -d' ' -f2)
 port=5464
 portssl=2229
 ports=$port:$portssl
@@ -33,6 +31,8 @@ check() {
 }
 
 start() {
+    uid=$(grep -m1 -i "com.netease.cloudmusic" /data/system/packages.list | cut -d' ' -f2)
+    liteuid=$(grep -m1 -i "com.netease.cloudmusic.lite" /data/system/packages.list | cut -d' ' -f2)
     nohup "$nodejs" "$appjs" -a 0.0.0.0 -p $ports -o $sources -e "http://music.163.com" > "$log" 2>&1 &
     echo -n $! > ${pid_file}
     iptables -t nat -A OUTPUT -p tcp -m owner --uid-owner $uid -m tcp --dport 80 -j DNAT --to 127.0.0.1:${port}
@@ -47,6 +47,8 @@ start() {
 }
 
 stop() {
+    uid=$(grep -m1 -i "com.netease.cloudmusic" /data/system/packages.list | cut -d' ' -f2)
+    liteuid=$(grep -m1 -i "com.netease.cloudmusic.lite" /data/system/packages.list | cut -d' ' -f2)
     kill -9 `cat ${pid_file}` || kill `cat ${pid_file}`
     iptables -t nat -D OUTPUT -p tcp -m owner --uid-owner $uid -m tcp --dport 80 -j DNAT --to 127.0.0.1:${port}
     iptables -t nat -D OUTPUT -p tcp -m owner --uid-owner $uid -m tcp --dport 443 -j DNAT --to 127.0.0.1:${portssl}
