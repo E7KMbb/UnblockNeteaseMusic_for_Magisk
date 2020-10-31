@@ -39,10 +39,10 @@ start() {
     iptables -t nat -A OUTPUT -p tcp -m owner --uid-owner $uid -m tcp --dport 443 -j DNAT --to 127.0.0.1:${portssl}
     iptables -t nat -A OUTPUT -p tcp -m owner --uid-owner $liteuid -m tcp --dport 80 -j DNAT --to 127.0.0.1:${port}
     iptables -t nat -A OUTPUT -p tcp -m owner --uid-owner $liteuid -m tcp --dport 443 -j DNAT --to 127.0.0.1:${portssl}
-    ip6tables -t nat -A OUTPUT -p tcp -m owner --uid-owner $uid -m tcp --dport 80 -j DNAT --to 127.0.0.1:${port}
-    ip6tables -t nat -A OUTPUT -p tcp -m owner --uid-owner $uid -m tcp --dport 443 -j DNAT --to 127.0.0.1:${portssl}
-    ip6tables -t nat -A OUTPUT -p tcp -m owner --uid-owner $liteuid -m tcp --dport 80 -j DNAT --to 127.0.0.1:${port}
-    ip6tables -t nat -A OUTPUT -p tcp -m owner --uid-owner $liteuid -m tcp --dport 443 -j DNAT --to 127.0.0.1:${portssl}
+    ip6tables -t nat -A OUTPUT -p tcp -m owner --uid-owner $uid -m tcp --dport 80 -j DNAT --to ::1:${port}
+    ip6tables -t nat -A OUTPUT -p tcp -m owner --uid-owner $uid -m tcp --dport 443 -j DNAT --to ::1:${portssl}
+    ip6tables -t nat -A OUTPUT -p tcp -m owner --uid-owner $liteuid -m tcp --dport 80 -j DNAT --to ::1:${port}
+    ip6tables -t nat -A OUTPUT -p tcp -m owner --uid-owner $liteuid -m tcp --dport 443 -j DNAT --to ::1:${portssl}
     echo "已开启服务"
 }
 
@@ -52,10 +52,10 @@ stop() {
     iptables -t nat -D OUTPUT -p tcp -m owner --uid-owner $uid -m tcp --dport 443 -j DNAT --to 127.0.0.1:${portssl}
     iptables -t nat -D OUTPUT -p tcp -m owner --uid-owner $liteuid -m tcp --dport 80 -j DNAT --to 127.0.0.1:${port}
     iptables -t nat -D OUTPUT -p tcp -m owner --uid-owner $liteuid -m tcp --dport 443 -j DNAT --to 127.0.0.1:${portssl}
-    ip6tables -t nat -D OUTPUT -p tcp -m owner --uid-owner $uid -m tcp --dport 80 -j DNAT --to 127.0.0.1:${port}
-    ip6tables -t nat -D OUTPUT -p tcp -m owner --uid-owner $uid -m tcp --dport 443 -j DNAT --to 127.0.0.1:${portssl}
-    ip6tables -t nat -D OUTPUT -p tcp -m owner --uid-owner $liteuid -m tcp --dport 80 -j DNAT --to 127.0.0.1:${port}
-    ip6tables -t nat -D OUTPUT -p tcp -m owner --uid-owner $liteuid -m tcp --dport 443 -j DNAT --to 127.0.0.1:${portssl}
+    ip6tables -t nat -D OUTPUT -p tcp -m owner --uid-owner $uid -m tcp --dport 80 -j DNAT --to ::1:${port}
+    ip6tables -t nat -D OUTPUT -p tcp -m owner --uid-owner $uid -m tcp --dport 443 -j DNAT --to ::1:${portssl}
+    ip6tables -t nat -D OUTPUT -p tcp -m owner --uid-owner $liteuid -m tcp --dport 80 -j DNAT --to ::1:${port}
+    ip6tables -t nat -D OUTPUT -p tcp -m owner --uid-owner $liteuid -m tcp --dport 443 -j DNAT --to ::1:${portssl}
     rm -rf ${pid_file}
     echo "已关闭服务"
 }
