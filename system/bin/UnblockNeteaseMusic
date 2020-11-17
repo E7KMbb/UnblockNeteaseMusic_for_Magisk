@@ -64,11 +64,13 @@ stop() {
 
 boot_start_on() {
     sed -i "s/boot_start=false/boot_start=true/g" ${UnblockNeteaseMusic_path}/service.sh
+    boot_start=$(grep boot_start ${UnblockNeteaseMusic_path}/service.sh | head -n 1 | awk -F '=' '{print $2}')
     echo "开机自启: 开启"
 }
 
 boot_start_off() {
     sed -i "s/boot_start=true/boot_start=false/g" ${UnblockNeteaseMusic_path}/service.sh
+    boot_start=$(grep boot_start ${UnblockNeteaseMusic_path}/service.sh | head -n 1 | awk -F '=' '{print $2}')
     echo "开机自启: 关闭"
 }
 
