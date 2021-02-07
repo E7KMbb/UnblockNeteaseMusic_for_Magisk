@@ -21,7 +21,7 @@ if [ -f ${pid_file} ] ; then
     rm -rf ${pid_file}
 fi
 
-if [ boot_start = "true" ]; then
+if [ $boot_start = "true" ]; then
    for i in $(seq 1 30); do
       ping -c 1 music.163.com > /dev/null 2>&1
       if [ $? -eq 0 ];then
