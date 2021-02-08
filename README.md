@@ -27,7 +27,7 @@ boot_start_on    开启开机自启
 boot_start_off    关闭启开机自启
 update    更新UnblockNeteaseMusic脚本
 ```
-* 例如: `UnblockNeteaseMusic start` 以启动服务
+* 例如: `UNM start` 以启动服务
 
 ### 注意:服务默认开机自启
 
