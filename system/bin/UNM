@@ -143,9 +143,9 @@ case "$1" in
   boot_start_off)
     boot_start_off
     ;;
-  update)
-    update
-    ;;
+#  update)
+#    update
+#    ;;
   -help)
     -help
     ;;
