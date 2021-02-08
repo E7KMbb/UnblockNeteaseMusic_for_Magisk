@@ -17,7 +17,7 @@
 
 ### 服务控制
 
-* 在Andoid termux下以 `su` 权限执行 `UnblockNeteaseMusic` 命令
+* 在Andoid termux下以 `su` 权限执行 `UNM` 命令
 * 可用参数
 ```
 -help    帮助
