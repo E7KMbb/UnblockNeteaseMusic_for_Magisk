@@ -132,5 +132,5 @@ $MODPATH/*.md $MODPATH/.git* $MODPATH/LICENSE $MODPATH/node.tar.xz 4>/dev/null
   # 默认权限请勿删除
   set_perm_recursive $MODPATH 0 0 0755 0644
   set_perm $MODPATH/node 0 0 755
-  set_perm $MODPATH/system/bin/UnblockNeteaseMusic 0 0 777
+  set_perm $MODPATH/system/bin/UNM 0 0 777
 
