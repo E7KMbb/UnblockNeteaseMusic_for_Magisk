@@ -2,8 +2,6 @@
 
 UnblockNeteaseMusic_path="/data/adb/modules/UnblockNeteaseMusic"
 UnblockNeteaseMusic_link="https://github.com/nondanee/UnblockNeteaseMusic/releases"
-latest_UnblockNeteaseMusic_version=`curl -k -s -I "${UnblockNeteaseMusic_link}/latest" | grep -i location | grep -o "tag.*" | grep -o "v[0-9.]*"`
-download_link="https://codeload.github.com/nondanee/UnblockNeteaseMusic/zip/${latest_UnblockNeteaseMusic_version}"
 sources="kuwo qq xiami baidu joox kugou"
 nodejs=${UnblockNeteaseMusic_path}/node
 appjs=${UnblockNeteaseMusic_path}/UnblockNeteaseMusic/app.js
@@ -12,6 +10,7 @@ port=5464
 portssl=2229
 ports=$port:$portssl
 log=${UnblockNeteaseMusic_path}/日志.log
+ip6tables -t nat -S >/dev/null 2>&1 && IPv6support=true || IPv6support=false  # 检查IPv6 nat
 
 check() {
     boot_start=$(grep boot_start ${UnblockNeteaseMusic_path}/service.sh | head -n 1 | awk -F '=' '{print $2}')
@@ -31,39 +30,35 @@ check() {
 }
 
 start() {
-    uid=$(grep -m1 -i "com.netease.cloudmusic" /data/system/packages.list | cut -d' ' -f2)
-    liteuid=$(grep -m1 -i "com.netease.cloudmusic.lite" /data/system/packages.list | cut -d' ' -f2)
-    nohup "$nodejs" "$appjs" -a 0.0.0.0 -p $ports -o $sources -e "http://music.163.com" > "$log" 2>&1 &
+    nohup "$nodejs" "$appjs" -a 0.0.0.0 -p $ports -o $sources -e "https://music.163.com" > "$log" 2>&1 &
     echo -n $! > ${pid_file}
-    iptables -t nat -A OUTPUT -p tcp -m owner --uid-owner $uid -m tcp --dport 80 -j DNAT --to 127.0.0.1:${port}
-    iptables -t nat -A OUTPUT -p tcp -m owner --uid-owner $uid -m tcp --dport 443 -j DNAT --to 127.0.0.1:${portssl}
-    ip6tables -t nat -A OUTPUT -p tcp -m owner --uid-owner $uid -m tcp --dport 80 -j DNAT --to ::1:${port}
-    ip6tables -t nat -A OUTPUT -p tcp -m owner --uid-owner $uid -m tcp --dport 443 -j DNAT --to ::1:${portssl}
-    if [ $liteuid ];then
-       iptables -t nat -A OUTPUT -p tcp -m owner --uid-owner $liteuid -m tcp --dport 80 -j DNAT --to 127.0.0.1:${port}
-       iptables -t nat -A OUTPUT -p tcp -m owner --uid-owner $liteuid -m tcp --dport 443 -j DNAT --to 127.0.0.1:${portssl}
-       ip6tables -t nat -A OUTPUT -p tcp -m owner --uid-owner $liteuid -m tcp --dport 80 -j DNAT --to ::1:${port}
-       ip6tables -t nat -A OUTPUT -p tcp -m owner --uid-owner $liteuid -m tcp --dport 443 -j DNAT --to ::1:${portssl}
-    fi
+    iptrules -A
     echo "已开启服务"
 }
 
 stop() {
-    uid=$(grep -m1 -i "com.netease.cloudmusic" /data/system/packages.list | cut -d' ' -f2)
-    liteuid=$(grep -m1 -i "com.netease.cloudmusic.lite" /data/system/packages.list | cut -d' ' -f2)
     kill -9 `cat ${pid_file}` || kill `cat ${pid_file}`
-    iptables -t nat -D OUTPUT -p tcp -m owner --uid-owner $uid -m tcp --dport 80 -j DNAT --to 127.0.0.1:${port}
-    iptables -t nat -D OUTPUT -p tcp -m owner --uid-owner $uid -m tcp --dport 443 -j DNAT --to 127.0.0.1:${portssl}
-    ip6tables -t nat -D OUTPUT -p tcp -m owner --uid-owner $uid -m tcp --dport 80 -j DNAT --to ::1:${port}
-    ip6tables -t nat -D OUTPUT -p tcp -m owner --uid-owner $uid -m tcp --dport 443 -j DNAT --to ::1:${portssl}
-    if [ $liteuid ];then
-       iptables -t nat -D OUTPUT -p tcp -m owner --uid-owner $liteuid -m tcp --dport 80 -j DNAT --to 127.0.0.1:${port}
-       iptables -t nat -D OUTPUT -p tcp -m owner --uid-owner $liteuid -m tcp --dport 443 -j DNAT --to 127.0.0.1:${portssl}
-       ip6tables -t nat -D OUTPUT -p tcp -m owner --uid-owner $liteuid -m tcp --dport 80 -j DNAT --to ::1:${port}
-       ip6tables -t nat -D OUTPUT -p tcp -m owner --uid-owner $liteuid -m tcp --dport 443 -j DNAT --to ::1:${portssl}
-    fi
+    iptrules -D
     rm -rf ${pid_file}
     echo "已关闭服务"
+}
+
+iptrules() {  #处理iptables规则 $1=[-A / -D] 添加或移除
+   local uid; for uid in 'com.netease.cloudmusic' 'com.netease.cloudmusic.lite'
+  	do
+	  	uid=$(grep -m1 -i $uid /data/system/packages.list |cut -d' ' -f2)
+	  	[ -z "$uid" ] && continue  # 不存在则跳过
+
+      # 加载规则
+      iptables -t nat $1 OUTPUT -p tcp --dport 80 -m owner --uid-owner $uid -j DNAT --to 127.0.0.1:${port}
+      iptables -t nat $1 OUTPUT -p tcp --dport 443 -m owner --uid-owner $uid -j DNAT --to 127.0.0.1:${portssl}
+      if [ $IPv6support == 'true' ];then  # 不支持则封锁
+        ip6tables -t nat $1 OUTPUT -p tcp -m owner --uid-owner $uid -m tcp --dport 80 -j DNAT --to ::1:${port}
+        ip6tables -t nat $1 OUTPUT -p tcp -m owner --uid-owner $uid -m tcp --dport 443 -j DNAT --to ::1:${portssl}
+      else
+        ip6tables -t filter $1 OUTPUT -p tcp -m owner --uid-owner $uid -m multiport --destination-port 80,443 -j DROP
+      fi
+  	done
 }
 
 boot_start_on() {
@@ -79,6 +74,9 @@ boot_start_off() {
 }
 
 update() {
+    latest_UnblockNeteaseMusic_version=`curl -k -s -I "${UnblockNeteaseMusic_link}/latest" | grep -i location | grep -o "tag.*" | grep -o "v[0-9.]*"`
+    download_link="https://codeload.github.com/nondanee/UnblockNeteaseMusic/zip/${latest_UnblockNeteaseMusic_version}"
+
     if [ -e ${UnblockNeteaseMusic_path}/UnblockNeteaseMusic.pid ];then
        stop
     fi
