@@ -87,26 +87,27 @@ REPLACE="
 # 将 $ZIPFILE 提取到 $MODPATH
 ui_print "- 解压模块文件"
 unzip -o "$ZIPFILE" -x 'META-INF/*' -d $MODPATH >&2
-tar -xf $MODPATH/node.tar.xz -C $MODPATH >&2
+tar -xf $MODPATH/node.tar.xz -C $TMPDIR >&2
+set_perm_recursive $TMPDIR/node 0 0 0755 0644
 case "${ARCH}" in
 arm)
-   mv -f $MODPATH/node/node-arm $MODPATH/node
+   mv -f $TMPDIR/node/node-arm $MODPATH/node
    ;;
 arm64)
-   mv -f $MODPATH/node/node-arm64 $MODPATH/node
+   mv -f $TMPDIR/node/node-arm64 $MODPATH/node
    ;;
 x86)
-   mv -f $MODPATH/node/node-x86 $MODPATH/node
+   mv -f $TMPDIR/node/node-x86 $MODPATH/node
    ;;
 x86_64)
-   mv -f $MODPATH/node/node-x64 $MODPATH/node
+   mv -f $TMPDIR/node/node-x64 $MODPATH/node
    ;;
 esac
 
 # 删除多余文件
 rm -rf \
 $MODPATH/system/placeholder $MODPATH/customize.sh \
-$MODPATH/*.md $MODPATH/.git* $MODPATH/LICENSE $MODPATH/node.tar.xz $MODPATH/node 5>/dev/null
+$MODPATH/*.md $MODPATH/.git* $MODPATH/LICENSE $MODPATH/node.tar.xz 5>/dev/null
 
 ##########################################################################################
 # 权限设置
