@@ -8,21 +8,13 @@ MODDIR=${0%/*}
 # 此脚本将在late_start service 模式执行
 boot_start=true
 pid_file="$MODDIR/UnblockNeteaseMusic.pid"
-wait_count=0
-until [ $(getprop sys.boot_completed) -eq 1 ] && [ -d "/sdcard" ]; do
-  sleep 2
-  wait_count=$((${wait_count} + 1))
-  if [ ${wait_count} -ge 100 ] ; then
-    exit 0
-  fi
-done
 
 if [ -f ${pid_file} ] ; then
     rm -rf ${pid_file}
 fi
 
 if [ $boot_start = "true" ]; then
-   for i in $(seq 1 30); do
+   for i in $(seq 1 50); do
       ping -c 1 music.163.com > /dev/null 2>&1
       if [ $? -eq 0 ];then
       UNM start

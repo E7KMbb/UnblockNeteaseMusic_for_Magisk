@@ -55,7 +55,8 @@
 # 请在custom.sh中标注SKIPUNZIP=1
 # 以跳过提取操作并应用默认权限/上下文上下文步骤。
 # 请注意，这样做后，您的custom.sh将负责自行安装所有内容。
-SKIPUNZIP=1
+SKIPUNZIP=0
+ASH_STANDALONE=1
 
 ##########################################################################################
 # 替换列表
@@ -85,28 +86,10 @@ REPLACE="
 # 当然，你也可以自定义安装脚本
 # 需要时请删除#
 # 将 $ZIPFILE 提取到 $MODPATH
-ui_print "- 解压模块文件"
-unzip -o "$ZIPFILE" -x 'META-INF/*' -d $MODPATH >&2
-tar -xf $MODPATH/node.tar.xz -C $MODPATH >&2
-case "${ARCH}" in
-arm)
-   mv -f $MODPATH/node/node-arm $MODPATH/node
-   ;;
-arm64)
-   mv -f $MODPATH/node/node-arm64 $MODPATH/node
-   ;;
-x86)
-   mv -f $MODPATH/node/node-x86 $MODPATH/node
-   ;;
-x86_64)
-   mv -f $MODPATH/node/node-x64 $MODPATH/node
-   ;;
-esac
 
-# 删除多余文件
-rm -rf \
-$MODPATH/system/placeholder $MODPATH/customize.sh \
-$MODPATH/*.md $MODPATH/.git* $MODPATH/LICENSE $MODPATH/node.tar.xz $MODPATH/node 5>/dev/null
+mv $MODPATH/node.tar.xz $TMPDIR
+tar -xf $TMPDIR/node.tar.xz node/node-$ARCH >&2
+cp $TMPDIR/node/node-$ARCH $MODPATH/node
 
 ##########################################################################################
 # 权限设置
@@ -132,5 +115,4 @@ $MODPATH/*.md $MODPATH/.git* $MODPATH/LICENSE $MODPATH/node.tar.xz $MODPATH/node
   # 默认权限请勿删除
   set_perm_recursive $MODPATH 0 0 0755 0644
   set_perm $MODPATH/node 0 0 755
-  set_perm $MODPATH/system/bin/UNM 0 0 777
-
+  set_perm $MODPATH/system/bin/UNM 0 0 755
