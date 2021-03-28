@@ -14,7 +14,7 @@ ip6tables -t nat -S >/dev/null 2>&1 && IPv6support=true || IPv6support=false  # 
 
 check() {
 	boot_start=$(grep boot_start ${UnblockNeteaseMusic_path}/service.sh | head -n 1 | awk -F '=' '{print $2}')
-	if [ -e ${UnblockNeteaseMusic_path}/UnblockNeteaseMusic.pid ];then
+	if [ -e ${pid_file} ];then
 		echo "正在运行"
 	else
 		echo "没有运行"
@@ -77,7 +77,7 @@ update() {
 	latest_UnblockNeteaseMusic_version=`curl -k -s -I "${UnblockNeteaseMusic_link}/latest" | grep -i location | grep -o "tag.*" | grep -o "v[0-9.]*"`
 	download_link="https://codeload.github.com/nondanee/UnblockNeteaseMusic/zip/${latest_UnblockNeteaseMusic_version}"
 
-	if [ -e ${UnblockNeteaseMusic_path}/UnblockNeteaseMusic.pid ];then
+	if [ -e ${pid_file} ];then
 		stop
 	fi
 	echo "开始更新"
