@@ -2,7 +2,7 @@
 
 UnblockNeteaseMusic_path="/data/adb/modules/UnblockNeteaseMusic"
 UnblockNeteaseMusic_link="https://github.com/nondanee/UnblockNeteaseMusic/releases"
-sources="kuwo qq xiami baidu joox kugou"
+sources="qq bilibili baidu kugou kuwo"
 nodejs=${UnblockNeteaseMusic_path}/node
 appjs=${UnblockNeteaseMusic_path}/UnblockNeteaseMusic/app.js
 pid_file=${UnblockNeteaseMusic_path}/UnblockNeteaseMusic.pid
