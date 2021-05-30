@@ -108,4 +108,4 @@ cp $TMPDIR/node/node-$ARCH $MODPATH/node
 # 默认权限请勿删除
 set_perm_recursive $MODPATH 0 0 0755 0644
 set_perm $MODPATH/node 0 0 755
-set_perm $MODPATH/system/bin/UNM 0 0 755
+set_perm $MODPATH/system/bin/unm 0 0 755

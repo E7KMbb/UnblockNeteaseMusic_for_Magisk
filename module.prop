@@ -1,6 +1,6 @@
 id=UnblockNeteaseMusic
 name=UnblockNeteaseMusic for Magisk
 version=Canary
-versionCode=20210328
+versionCode=20210530
 author=依然的爱
-description=网易云音乐解锁变灰，服务状态控制请在在终端以su权限输入UnblockNeteaseMusic以控制，默认开机自启
+description=网易云音乐解锁变灰，服务状态控制请在在终端以su权限输入unm以控制，默认开机自启
