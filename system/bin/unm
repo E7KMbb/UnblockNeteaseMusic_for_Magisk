@@ -1,7 +1,7 @@
 #!/system/bin/sh
 
 UnblockNeteaseMusic_path="/data/adb/modules/UnblockNeteaseMusic"
-UnblockNeteaseMusic_link="https://github.com/nondanee/UnblockNeteaseMusic/releases"
+UnblockNeteaseMusic_link="https://github.com/1715173329/UnblockNeteaseMusic/releases"
 sources="qq bilibili baidu kugou kuwo"
 nodejs=${UnblockNeteaseMusic_path}/node
 appjs=${UnblockNeteaseMusic_path}/UnblockNeteaseMusic/app.js
@@ -75,7 +75,7 @@ boot_start_off() {
 
 update() {
 	latest_UnblockNeteaseMusic_version=`curl -k -s -I "${UnblockNeteaseMusic_link}/latest" | grep -i location | grep -o "tag.*" | grep -o "v[0-9.]*"`
-	download_link="https://codeload.github.com/nondanee/UnblockNeteaseMusic/zip/${latest_UnblockNeteaseMusic_version}"
+	download_link="https://codeload.github.com/1715173329/UnblockNeteaseMusic/zip/${latest_UnblockNeteaseMusic_version}"
 
 	if [ -e ${pid_file} ];then
 		stop
